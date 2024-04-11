@@ -1,0 +1,639 @@
+---
+title: "Final Analyses"
+author: "N1049988"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Research Questions 
+ How do socio-economic factors influence subjective well-being and markers of adulthood? This question seeks to understand the overarching impact of income and education on life satisfaction and development milestones.
+
+What role does social support play in the relationship between socio-economic status and well-being? Here, we explore how the presence and perception of social support mediates the effects of socio-economic background on wellbeing. 
+
+How do individual beliefs and attitudes, such as self-efficacy, impact subjective well-being? This inquiry focuses on the influence of personal perceptions and mindset on overall wellbeing.
+
+
+These questions guided both selection of appropriate modelling techniques, some of which emerged during the process of analysis rather than decided prior. A range of techniques were explored to facilitate a flexible breadth of understanding of the relationships between variables in the data.  
+
+## Variables used in analyses
+
+
+SWB Levels (ordinal): Categorized into 'Low', 'Medium', and 'High' for analysis with ordinal logistic regression to further understand the impact of socio-economic status, individual beliefs, and demographics on SWB.
+
+Income (continuous, income brackets): Considered as one of the socio-economic factors influencing the markers of adulthood and subjective well-being (SWB).
+
+Education (edu/EducationCoded, categorical): Analyzed for its impact on markers of adulthood and SWB, as well as its interaction with income and supportSUM.
+
+Social Support (supportSUM, continuous): Investigated for its role in the relationship between socio-economic factors and SWB, as well as its varying impact when interacting with income and education.
+
+Subjective Well-Being (SWBscale, continuous): The primary outcome variable measured across multiple models to understand the impact of socio-economic factors, social support, and individual attitudes/beliefs (IDEA/MoA).
+
+Markers of Adulthood (Markers_of_Adulthood/MoA): A derived variable from MoAimportSUM and MoAachieveSUM, analyzed to understand its association with socio-economic factors.
+Race (RaceCoded): Used in the multi-level model to understand the variance in SWB across different racial groups.
+
+Individual Attitudes/Beliefs: Including IDEA variable (continuous) consisting of 4, 2-item, sub scales measuring perceptions associated with (1) IDEA8_identity, (2) IDEA8_exp (Experimentation), (3) IDEA8_negativity, (4) IDEA8_between, used in the SEM model to understand their relative impact on SWB.
+
+Social Media Use (SocMediaSum, continuous) and Perceived Efficacy (efficacySUM, continuous): Included in the SEM model to explore their mediation effects between individual beliefs and SWB.
+
+
+## Model specifications for each RQ
+
+### Multiple Linear Regressions
+
+MLR models were used to analyse the direct impact of socio-economic factors on SWB and markers of adulthood, as well as the mediation role of social support.
+
+The key findings here were that income and education are not significant predictors of Markers of Adulthood, as indicated by their non-significant p-values and the model's negligible explanatory power for variance in the outcome.
+
+Subsequent MLR models were specified  as follows, model 1: `lm(SWBscale ~ income + edu, data = filtered_ea_df)` and model 2: `lm(SWBscale ~ income * edu * supportSUM, data = filtered_ea_df)`, including interaction terms to explore complexity. 
+
+The most notable finding is the significant positive relationship between support and subjective well-being, suggesting that perceived support plays an important role in enhancing individuals' subjective well-being.
+The interactions between income, education, and support do not show statistically significant effects on subjective well-being, indicating that **the individual effect of support is the primary driver in this model**. This would make sense potentially, since the sample being analysed had mostly low income, for it not to be a significant factor. 
+
+Income and education alone do not have statistically significant associations with subjective well-being in this analysis.
+These results highlight the importance of social support in contributing to subjective well-being, regardless of an individual's income or education level.
+
+After conducting LRT to compare model fit, findings that Model 2 is better than Model 1, supported by the significantly lower AIC (Model 1: 6738.022, Model 2: 6283.122) and BIC (Model 1: 6760.406, Model 2: 6333.485) values. Model 2 significantly improves the model fit compared to Model 1 (p < 2.2e-16), as evidenced by the decrease in residual sum of squares (RSS) and the increase in the F-statistic (F = 104.32). The interaction terms in Model 2 contribute significantly to explaining the variability in SWBscale.
+
+### Structural equation model
+SEM was employed to further explore nuanced relationships in the dataset. In essence, the SEM model explores how the IDEA scale (made up of 4 sub-scales; identity exploration, experimentation, negativity, and feelings of being in-between) relate to an individual’s subjective well-being, both directly and indirectly, through their social media usage and perceived efficacy. The model is quite comprehensive, considering both direct and mediated pathways, which allows for a nuanced understanding of the dynamics at play. It would be used to test a theoretical framework regarding the influences of various key variables on SWB.
+
+The SEM model specification: `'
+Identity_explo =~ IDEA8_identity
+Experimentation =~ IDEA8_exp
+Negativity =~ IDEA8_negativity
+Feeling_inbetween =~ IDEA8_between
+
+SWBscale ~ Identity_explo + Experimentation + Negativity + Feeling_inbetween
+
+SocMediaSum ~ Identity_explo + Experimentation + Negativity + Feeling_inbetween
+efficacySUM ~ Identity_explo + Experimentation + Negativity + Feeling_inbetween
+
+SWBscale ~ SocMediaSum + efficacySUM
+'`
+The SEM specified is not a traditional measurement model, as each of the 4 latent variables are measured each by single indicators comprised of only 2 items reflecting observed variables.  This is not typical, but will suffice here under the specific rationale.  The model specifies paths from the four latent variables to the SWBscale observed variable. This suggests that SWBscale is being regressed on the four latent factors. Similarly, SocMediaSum and efficacySUM are also being regressed on the latent factors. Furthermore, there are direct paths from SocMediaSum and efficacySUM to SWBscale. These paths form the structural model in SEM, to facilitate an examination of the relationships.
+
+SEM excels in analysing complex, theory-driven research questions by allowing the investigation of direct and indirect effects among latent constructs, making it ideal for exploring how individual beliefs and attitudes impact well-being, including the mediation roles of factors like social media use and self-efficacy.
+
+### Multi level model 
+The linear mixed-effects multi-level model analyses examines the relationship between socio-economic factors (income, education), perceived social support, and race as moderators on subjective well-being (SWB). 
+The analysis involves two linear mixed models (MLMs) examining the effects of income, education, and social support on subjective well-being (SWB), with race coded as a random effect to account for variability across different racial groups. Here's a summary of the findings from each model:
+
+MLM Without Interaction (Model 1 spec: `lmer(SWBscale ~ income + EducationCoded + supportSUM + (1 | RaceCoded), data = df_complete_mlm1)`.) The model looks at direct effects of income, education levels, and social support on SWB. 
+Random Effects: Variability attributed to race shows a small variance, indicating that while there is some variability in SWB across races, it might not be substantial.
+Fixed Effects: Social support (supportSUM) has a significant positive effect on SWB, with a t-value of 21.751, suggesting a strong relationship. Income and education have varied effects on SWB, with higher income brackets generally showing a positive association with SWB.
+Residuals and Model Fit: The scaled residuals suggest a reasonably good fit, though there are outliers. The model's REML criterion indicates its relative quality for comparing with similar models.
+
+MLM With Interaction (Model 2 spec: `lmer(SWBscale ~ income * EducationCoded * supportSUM + (1 | RaceCoded), data = df_complete_mlm2)`.) This model includes interactions between income, education, and social support to explore their combined effects on SWB. Random Effects: Similar to the first model, there is a small but present variance due to race.
+Fixed Effects: The interaction terms reveal complex relationships between income, education, and social support. For instance, the negative estimate for higher income levels interacting with graduate education and support suggests that the positive effect of social support on SWB might vary significantly across different socioeconomic contexts.
+Model Complexity and Warnings: The model is substantially more complex, as indicated by the inclusion of numerous interaction terms. A warning about the fixed-effect model matrix being rank deficient suggests that some predictors or their interactions are highly correlated, leading to dropped coefficients for resolving the issue.
+
+
+Key findings: 
+Social Support's Strong Influence: Social support emerges as a critical and consistent predictor of subjective well-being (SWB) across models, underscoring its significance for emerging adults' well-being.
+Nuanced Role of Socioeconomic Factors: While income and education levels exhibit variable effects on SWB, their influence becomes more complex when considering interactions, suggesting that social support moderates these effects.
+Intricate Interactions Highlight Complexity: The detailed interactions among income, education, and social support reveal a multifaceted relationship with SWB, where specific socioeconomic combinations uniquely affect well-being.
+Modeling Complexities and Correlations: The advanced model underscores the intricacies of capturing interactions within MLMs and points to challenges arising from correlated predictors, as evidenced by rank deficiency warnings.
+
+Model comparisons (LRT) comparing the simpler model (mlm1) with a model including interactions (mlm2_INT) suggests a marginally significant improvement in fit with the inclusion of interaction terms (Chi-square = 83.631, df = 64, p = 0.05034), indicating that the complexities captured by the interactions may contribute to understanding variations in subjective well-being.
+
+### Ordinal logistic regression (OLR)
+
+The two ordinal logistic regression (OLR) models are designed to test how various aspects of identity and experience predict subjective well-being (SWB), categorized into terciles (Low, Medium, High), among emerging adults.
+
+OLR Model 1 examines the direct effects of identity exploration (IDEA8_identity), experimentation (IDEA8_exp), negativity (IDEA8_negativity), and feeling in-between (IDEA8_between) on the categorized SWB. 
+(OLR1; `polr(SWB_category ~ IDEA8_exp + IDEA8_identity + IDEA8_negativity + IDEA8_between, 
+data = complete_df_OLR1, Hess = TRUE)`.)
+
+
+OLR Model 2 explores not only these direct effects but also investigates the interactions between identity exploration, experimentation, negativity, feeling in-between, and additional variables of self-efficacy (efficacySUM) and social media use (SocMediaSum) on SWB, aiming to uncover more complex relationships and potential moderating effects. 
+(OLR2_INT; `polr(SWB_category ~ IDEA8_exp * SocMediaSum + IDEA8_exp * efficacySUM + 
+                                IDEA8_identity * SocMediaSum + IDEA8_identity * efficacySUM + 
+                                IDEA8_negativity * SocMediaSum + IDEA8_negativity * efficacySUM + 
+                                IDEA8_between * SocMediaSum + IDEA8_between * efficacySUM, 
+                                data = complete_df_OLR2, Hess = TRUE)`.) 
+
+**OLR1** highlights identity exploration's positive impact and negativity's negative influence on well-being, while These results suggest that certain aspects of emerging adulthood, particularly those related to identity exploration and negative experiences, play crucial roles in shaping individuals' subjective well-being during this transitional phase.
+
+**OLR2_INT** finds self-efficacy positively linked but no significant effect from social media use. While the negative impact of negativity and the positive influence of identity exploration on subjective well-being remain consistent, social media use and its interactions with emerging adulthood dimensions do not significantly predict subjective well-being categories. Additionally, self-efficacy emerges as another important factor positively associated with subjective well-being. 
+
+These findings underscore the complex interplay between emerging adulthood experiences, individual characteristics, and subjective well-being outcomes, highlighting the need for comprehensive approaches to understanding the well-being of emerging adults in contemporary society.
+
+Comparing the summaries of the two ordinal logistic regression models, OLR1 (without interactions) and OLR2_INT (with interactions), on the basis of AIC values for model fit, penalising for unnecessary complexity;
+
+**OLR1 AIC: 4275.698**
+**OLR2_INT AIC: 4077.845** 
+
+The model with the lower AIC is generally considered better in terms of the trade-off between goodness of fit and complexity. Here, OLR2_INT has a lower AIC than OLR1, suggesting it provides a better fit to the data despite its higher complexity due to the inclusion of interaction terms. This indicates that the interactions between identity/experience variables and efficacy/social media use contribute meaningfully to explaining variations in subjective well-being categories, making OLR2_INT the better model according to this criterion.
+
+
+```{r load packages and libraries, include=FALSE}
+install.packages(c("tidyverse", "psyntur", "mice", "haven", "lavaan", "lavaanPlot", "lme4", "lmerTest", "ggeffects", "MASS", "knitr", "kableExtra"))
+
+library(tidyverse) #dpylr part of tidyverse
+library(psyntur)
+library(knitr)
+library(kableExtra)
+library(mice)
+library(haven)
+library(lavaan)
+library(lavaanPlot)
+library(lme4)
+library(lmerTest)
+library(ggeffects)
+library(MASS)
+
+```
+
+```{r Load Data, include=FALSE}
+filtered_ea_df <- eamm_raw_df <- haven::read_sav("EAMMi2-CleanData.sav") %>%
+  filter(age >= 18 & age <= 29) 
+```
+
+
+```{r simple belonging, include = FALSE}
+
+#Model 1: Perceived Belonging's Influence on Subjective Well-being (SWB)
+#Select variables of interest,convert labelled cat variables to factors and impute
+
+df_select_reg_belong <- dplyr::select(filtered_ea_df, IDEA8_identity, IDEA8_exp, IDEA8_negativity, IDEA8_between, IDEASUM, SWBscale, SocMediaSum, efficacySUM, belongSUM, stressSUM, RaceCoded, EducationCoded, income, sex, age, MoAimportSUM, MoAachieveSUM, supportSUM)
+
+df_select_reg_belong <- df_select_reg_belong %>%
+  mutate(across(where(is.labelled), as_factor),  # Convert labelled categorical variables to factors
+         across(where(is.numeric), as.numeric))  # Ensure
+
+
+# Now perform multiple imputation
+imputed_df_regs_belong <- mice(df_select_reg_belong, m = 5, method = 'pmm', seed = 100) # need to convert haven labeled variables to be compatible for mice imputation
+
+# Creating a complete dataset from the first imputed dataset
+df_complete_regsbelong <- complete(imputed_df_regs_belong, 1)
+
+regbelong_simple <- lm(SWBscale ~ belongSUM, data = df_complete_regsbelong)
+
+summary(regbelong_simple)
+
+```
+
+```{r regression belonging interactions. term, include=FALSE}
+#Model 2: Combined Impact of Belonging, Support, and Self-efficacy on SWB with Interaction Terms
+regbelong_interaction <- lm(SWBscale ~ belongSUM * supportSUM * efficacySUM, data = df_complete_regsbelong)
+summary(regbelong_interaction)
+```
+
+```{r model 2 MLR SWB, include=FALSE}
+#Model 3: Socio-economic Factors' Influence on Subjective Well-being (SWB)
+SWB_SES_MLR <- lm(SWBscale ~ income + edu, data = filtered_ea_df)
+summary(SWB_SES_MLR)
+```
+
+
+```{r SWB_SES_MLR apa table process, include=FALSE}
+# Convert model summary to a dataframe
+df_summary_SWB_SES_MLR <- tidy(SWB_SES_MLR)
+
+df_summary_SWB_SES_MLR_renamed <- df_summary_SWB_SES_MLR %>%
+  rename(
+    `Variable` = term,
+    `Estimate (B)` = estimate,
+    `Std. Error (SE)` = std.error,
+    `t Value` = statistic,
+    `Pr(>|t|)` = p.value
+  )
+
+
+df_summary_SWB_SES_MLR_renamed %>%
+  kable(format = "latex", booktabs = TRUE, caption = "Regression Results", digits = 3) %>%
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  column_spec(1, bold = TRUE) %>%
+  column_spec(2:5)
+```
+
+```{r model 3 MLR interactions SWB, include=FALSE}
+#Model 4: Interaction Analysis of Socio-economic Factors and Social Support on SWB
+SWB_INT <- lm(SWBscale ~ income * edu * supportSUM, data = filtered_ea_df)
+summary(SWB_INT)
+
+confint(SWB_INT)
+```
+
+```{r MLRINTERACTIONS apa table, echo=FALSE}
+# Convert model summary to a dataframe
+df_summary_SWB_INT <- tidy(SWB_INT)
+
+df_summary_SWB_INT_renamed <- df_summary_SWB_INT %>%
+  rename(
+    `Variable` = term,
+    `Estimate (B)` = estimate,
+    `Std. Error (SE)` = std.error,
+    `t Value` = statistic,
+    `Pr(>|t|)` = p.value
+  )
+
+df_summary_SWB_INT_renamed %>%
+  kable(format = "latex", booktabs = TRUE, caption = "Regression Results", digits = 3) %>%
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  column_spec(1, bold = TRUE) %>%
+  column_spec(2:5)
+```
+
+```{r MLR model comp, LRT, include=FALSE}
+lrt_result_MLR <- anova(SWB_SES_MLR, SWB_INT)
+print(lrt_result_MLR)
+
+# Obtain AIC and BIC for both models
+AIC_model1 <- AIC(SWB_SES_MLR) #simpler model
+BIC_model1 <- BIC(SWB_SES_MLR)
+
+AIC_model2 <- AIC(SWB_INT) #interaction model has better overall fit 
+BIC_model2 <- BIC(SWB_INT)
+
+# Print AIC and BIC values
+cat("AIC for Model 1:", AIC_model1, "\n")
+cat("BIC for Model 1:", BIC_model1, "\n")
+
+cat("AIC for Model 2:", AIC_model2, "\n")
+cat("BIC for Model 2:", BIC_model2, "\n")
+```
+
+
+
+```{r SEM SWB/IDEA/SOCMED/EFFICACY, include=FALSE}
+
+#SEM model: Exploring Identity, Social Media Use, and Efficacy's Influence on Subjective Well-being
+# Explicitly using select from dplyr
+df_selected <- dplyr::select(filtered_ea_df, IDEA8_identity, IDEA8_exp, IDEA8_negativity, IDEA8_between, SWBscale, SocMediaSum, efficacySUM)
+
+# Convert haven_labelled variables to appropriate types (do this before proceeding with imputation )
+df_selected <- df_selected %>%
+  mutate(across(where(is.labelled), as_factor),  # Convert labelled categorical variables to factors
+         across(where(is.numeric), as.numeric))  # Ensure
+
+# Performing multiple imputation
+imputed_data <- mice(df_selected, m = 5, method = 'pmm', seed = 100) 
+
+# Creating a complete dataset from the first imputed dataset
+df_complete <- complete(imputed_data, 1)
+
+#Specify SEM model
+model_revise <- '
+Identity_explo =~ IDEA8_identity
+Experimentation =~ IDEA8_exp
+Negativity =~ IDEA8_negativity
+Feeling_inbetween =~ IDEA8_between
+
+SWBscale ~ Identity_explo + Experimentation + Negativity + Feeling_inbetween
+
+SocMediaSum ~ Identity_explo + Experimentation + Negativity + Feeling_inbetween
+efficacySUM ~ Identity_explo + Experimentation + Negativity + Feeling_inbetween
+
+SWBscale ~ SocMediaSum + efficacySUM
+'
+
+#Model output
+fit_revise <- sem(model_revise, data = df_complete)
+summary(fit_revise)
+
+# To extract the coefficients directly as a dataframe:
+coefficients <- parameterEstimates(fit_revise, standardized = TRUE) # standardized=TRUE for standardized coefficients
+
+# To view the coefficients
+print(coefficients)
+
+#Extract model fit indices
+fit_measures <- summary(fit_revise, fit.measures=TRUE)
+print(fit_measures) #The fit measures indicate that the specified structural equation model (SEM) provides a good fit to the data, with statistically significant regression coefficients suggesting meaningful relationships between the latent variables and observed variables in the model.
+```
+
+```{r sem plot diagram, echo=FALSE, out.width='100%', fig.align='center', fig.cap= "SEM diagram"}
+knitr::include_graphics("Rplot05.png")
+```
+
+```{r prepare apa table for SEM output, include=FALSE}
+#Extract coefficients
+coefficients_df <- as.data.frame(parameterEstimates(fit_revise, standardized = TRUE))
+
+# Extract fit measures
+fit_measures_df <- summary(fit_revise, fit.measures=TRUE)$fit
+```
+
+```{r apa table for SEM output, include=FALSE}
+# Create APA-style table for coefficients
+coefficients_table <- coefficients_df %>%
+  kable(caption = "Standardized Coefficients for SEM Model: Exploring Identity, Social Media Use, and Efficacy's Influence on Subjective Well-being", digits = 3, format = "latex", booktabs = TRUE) %>%
+  kable_styling(full_width = FALSE) %>%
+  column_spec(1, bold = TRUE)
+
+fit_measures_df %>%
+  kable(caption = "Fit Measures for SEM Model: Exploring Identity, Social Media Use, and Efficacy's Influence on Subjective Well-being", digits = 3, format = "latex", booktabs = TRUE) %>%
+  kable_styling(full_width = FALSE) %>%
+  column_spec(1, bold = TRUE)
+```
+
+```{r mardias test for multivariate normality of SEM, include=FALSE}
+install.packages("MVN")
+library(MVN)
+# Assuming `data` is a dataframe containing your multivariate data
+result <- mvn(df_complete, mvnTest = "mardia")
+# To print the results
+print(result$multivariateNormality) #according to this output, the data doesnt follow normal distribution. there is skewness and kurtosis sig enough to reject the null hyp 
+```
+
+
+```{r MLM, include=FALSE}
+#Selected vars of interest
+df_selected_mlm1 <- dplyr::select(filtered_ea_df, income, EducationCoded, supportSUM, SWBscale, RaceCoded)
+
+# Convert haven_labelled variables to appropriate types
+df_mlm1_ready <- df_selected_mlm1 %>%
+  mutate(across(where(is.labelled), as_factor),  # Convert labelled categorical variables to factors to be compatible for mice imputation
+         across(where(is.numeric), as.numeric))  
+
+# Performing multiple imputation
+imputed_data_mlm1 <- mice(df_mlm1_ready, m = 5, method = 'pmm', seed = 100) 
+
+# Creating a complete dataset from the first imputed dataset
+df_complete_mlm1 <- complete(imputed_data_mlm1, 1)
+
+#Model spec
+mlm1 <- lmer(SWBscale ~ income + EducationCoded + supportSUM + (1 | RaceCoded), data = df_complete_mlm1)
+summary(mlm1)
+
+#Get fit indices like AIC and BIC
+aic_value_mlm1 <- AIC(mlm1)
+print(aic_value_mlm1) #6375.989
+bic_value_mlm1 <- BIC(mlm1)
+print(bic_value_mlm1) #6465.636
+
+#Plot residuals of MLM
+
+plot(residuals(mlm1) ~ fitted(mlm1)) #Violation of linearity/ equality of variance (homoscedasicity) 
+
+# Calculate conditional effects
+ce <- ggpredict(mlm1, c("income", "EducationCoded", "supportSUM"))
+```
+
+
+```{r MLM plot conditional effects, include=FALSE}
+# Plot conditional effects
+plot(ce) #think this is a good plot for the final report to show how heterogeneity and interaction between predictor outcome and grouping variables like race/income 
+```
+
+
+```{r MLM_interaction, include = FALSE}
+#Model 2: Examining Interaction Effects on Subjective Well-being Across Racial Categories
+#Selected vars of interest
+df_selected_mlm2 <- dplyr::select(filtered_ea_df, income, EducationCoded, supportSUM, SWBscale, RaceCoded)
+
+# Convert haven_labelled variables to appropriate types
+df_mlm2_ready <- df_selected_mlm2 %>%
+  mutate(across(where(is.labelled), as_factor),  # Convert labelled categorical variables to factors
+         across(where(is.numeric), as.numeric))  # Ensure
+
+# Performing multiple imputation
+imputed_data_mlm2 <- mice(df_mlm2_ready, m = 5, method = 'pmm', seed = 100) # need to convert haven labeled variables to be compatible for mice imputation
+
+# Creating a complete dataset from the first imputed dataset
+df_complete_mlm2 <- complete(imputed_data_mlm2, 1)
+
+mlm2_INT <- lmer(SWBscale ~ income * EducationCoded * supportSUM + (1 | RaceCoded), data = df_complete_mlm2)
+summary(mlm2_INT)
+```
+
+```{r model comparison MLMs, include=FALSE}
+# Refit both models to the same, explicitly defined dataset
+mlm1 <- lmer(SWBscale ~ income + EducationCoded + supportSUM + (1 | RaceCoded), data = df_complete_mlm1, REML = FALSE)
+mlm2_INT <- lmer(SWBscale ~ income * EducationCoded * supportSUM + (1 | RaceCoded), data = df_complete_mlm1, REML = FALSE)
+
+aic_value_mlmint <- AIC(mlm2_INT) #6377.029
+print(aic_value_mlmint)
+
+bic_value_mlmint <- BIC(mlm2_INT) #6825.261
+print(bic_value_mlmint)
+
+#Likelihood Ratio Test again
+lrt_result_MLM <- anova(mlm1, mlm2_INT)
+print(lrt_result_MLM)
+```
+
+```{r MLM race , include = FALSE}
+mlm_moderater <- lmer(SWBscale ~ income * RaceCoded + EducationCoded * RaceCoded + supportSUM * RaceCoded + (1 | RaceCoded), data = df_complete_mlm1, REML = TRUE)
+summary(mlm_moderater)
+ 
+aic_value_mlm_mod <- AIC(mlm_moderater) #6469.832
+print(aic_value_mlm_mod)
+
+bic_value_mlm_mod <- BIC(mlm_moderater) 
+print(bic_value_mlm_mod) #7013.313
+```
+
+```{r LRT mlminteractions, include=FALSE}
+#Likelihood Ratio Test again
+lrt_result_MLM_INTS <- anova(mlm2_INT, mlm_moderater)
+print(lrt_result_MLM_INTS)
+```
+
+
+```{r OLR1, include=FALSE}
+
+#Select variables for imputation and modeling
+
+selected_OLR1 <- dplyr::select(filtered_ea_df, SWBscale, IDEA8_exp, IDEA8_identity, IDEA8_negativity, IDEA8_between)
+
+
+# Perform multiple imputation
+imputed_df_OLR1 <- mice(selected_OLR1, m = 5, method = 'pmm', seed = 123)
+
+# Create a complete dataset from the first set of imputations
+complete_df_OLR1 <- complete(imputed_df_OLR1, 1)
+
+# Calculate terciles of SWBscale
+terciles <- quantile(complete_df_OLR1$SWBscale, probs = c(1/3, 2/3), na.rm = TRUE)
+
+# Create SWB_category variable
+complete_df_OLR1$SWB_category <- cut(complete_df_OLR1$SWBscale,
+                                    breaks = c(-Inf, terciles, Inf),
+                                    labels = c("Low", "Medium", "High"),
+                                    include.lowest = TRUE)
+
+
+# Display the ranges for each category
+cat("Low: <= ", terciles[1], "\n",
+    "Medium: > ", terciles[1], " and <= ", terciles[2], "\n",
+    "High: > ", terciles[2], "\n")
+
+OLR1 <- polr(SWB_category ~ IDEA8_exp + IDEA8_identity + IDEA8_negativity + IDEA8_between, data = complete_df_OLR1, Hess = TRUE)
+summary(OLR1)
+```
+
+```{r OLR_interaction, include=FALSE}
+
+selected_OLR2 <- dplyr::select(filtered_ea_df, SWBscale, IDEA8_exp, IDEA8_identity, IDEA8_negativity, IDEA8_between, efficacySUM, SocMediaSum)
+
+
+# Perform multiple imputation
+imputed_df_OLR2 <- mice(selected_OLR2, m = 5, method = 'pmm', seed = 123)
+
+# Create a complete dataset from the first set of imputations
+complete_df_OLR2 <- complete(imputed_df_OLR2, 1)
+
+# Calculate terciles of SWBscale
+terciles <- quantile(complete_df_OLR2$SWBscale, probs = c(1/3, 2/3), na.rm = TRUE)
+
+# Create SWB_category variable
+complete_df_OLR2$SWB_category <- cut(complete_df_OLR2$SWBscale,
+                                    breaks = c(-Inf, terciles, Inf),
+                                    labels = c("Low", "Medium", "High"),
+                                    include.lowest = TRUE)
+
+
+# Display the ranges for each category
+cat("Low: <= ", terciles[1], "\n",
+    "Medium: > ", terciles[1], " and <= ", terciles[2], "\n",
+    "High: > ", terciles[2], "\n")
+
+OLR2_INT <- polr(SWB_category ~ IDEA8_exp * SocMediaSum + IDEA8_exp * efficacySUM + 
+                                          IDEA8_identity * SocMediaSum + IDEA8_identity * efficacySUM + 
+                                          IDEA8_negativity * SocMediaSum + IDEA8_negativity * efficacySUM + 
+                                          IDEA8_between * SocMediaSum + IDEA8_between * efficacySUM, 
+                                        data = complete_df_OLR2, Hess = TRUE)
+summarymodelintolr <- summary(OLR2_INT)
+```
+
+```{r apa table olr2, include=FALSE}
+
+# Extract coefficients, standard errors, and t-values from the summary
+coefs <- summary(OLR2_INT)$coefficients[, "Value"]
+std_errors <- summary(OLR2_INT)$coefficients[, "Std. Error"]
+t_values <- summary(OLR2_INT)$coefficients[, "t value"]
+
+# Extract p-values using the coefficients table
+p_values <- 2 * pt(abs(summary(OLR2_INT)$coefficients[, "t value"]), df = summary(OLR2_INT)$df.residual, lower.tail = FALSE)
+
+```
+
+```{r wald test olr interaction, include = FALSE}
+wald_stat <- summarymodelintolr$coefficients[, "t value"]^2
+
+# Calculating p-values using the chi-squared distribution
+p_values <- 1 - pchisq(wald_stat, df = 1)
+
+
+# Adding p-values to the summary table
+summarymodelintolr$coefficients <- cbind(summarymodelintolr$coefficients, "p-value" = p_values)
+
+
+# Printing the updated summary table with p-values
+table <- summarymodelintolr$coefficients
+```
+
+```{r apa table OLR interaction, echo=FALSE}
+kable(table, caption = "Regression Analysis Summary")
+```
+
+```{r LRT OLR, include = FALSE}
+LRT_OLR <- anova(OLR1, OLR2_INT)
+print(LRT_OLR)
+```
+
+
+```{r descriptives categorical variables table apa, results = 'asis', include=FALSE}
+#Select variables of interest,convert labelled cat variables to factors and impute
+
+df_descriptives <- dplyr::select(filtered_ea_df, IDEA8_identity, IDEA8_exp, IDEA8_negativity, IDEA8_between, IDEASUM, SWBscale, SocMediaSum, efficacySUM, belongSUM, stressSUM, RaceCoded, EducationCoded, income, sex, age, MoAimportSUM, MoAachieveSUM)
+
+df_descriptives <- df_descriptives %>%
+  mutate(across(where(is.labelled), as_factor),  # Convert labelled categorical variables to factors
+         across(where(is.numeric), as.numeric))  # Ensure
+
+
+# Now perform multiple imputation
+imputed_df_descriptives <- mice(df_descriptives, m = 5, method = 'pmm', seed = 100) # need to convert haven labeled variables to be compatible for mice imputation
+
+# Creating a complete dataset from the first imputed dataset
+df_complete_descriptives <- complete(imputed_df_descriptives, 1)
+
+# Summary for Numerical Variables: Mean and SD
+numerical_summary <- df_complete_descriptives %>%
+  select_if(is.numeric) %>%
+  summarise_all(list(mean = ~mean(.x, na.rm = TRUE), 
+                     sd = ~sd(.x, na.rm = TRUE)))
+
+print(numerical_summary)
+
+# Assuming df_complete is your complete dataset
+categorical_summary <- df_complete_descriptives %>%
+  summarise(across(where(is.factor), ~list(table(.x))))
+
+# To print the summary
+print(categorical_summary)
+
+#Freq tables for categorical variables 
+race_frqtable <- table(df_complete_descriptives$RaceCoded)
+edu_frqtable <- table(df_complete_descriptives$EducationCoded)
+sex_frqtable <- table(df_complete_descriptives$sex)
+income_frqtable <- table(df_complete_descriptives$income)
+
+# Creating data frames from the tables for better formatting with kable(), with an additional 'Variable' column
+df_race <- data.frame(Variable = "Race", Category = names(table(df_complete_descriptives$RaceCoded)), Count = as.integer(table(df_complete_descriptives$RaceCoded)))
+df_education <- data.frame(Variable = "Education Level", Category = names(table(df_complete_descriptives$EducationCoded)), Count = as.integer(table(df_complete_descriptives$EducationCoded)))
+df_sex <- data.frame(Variable = "Sex", Category = names(table(df_complete_descriptives$sex)), Count = as.integer(table(df_complete_descriptives$sex)))
+df_income <- data.frame(Variable = "Income", Category = names(table(df_complete_descriptives$income)), Count = as.integer(table(df_complete_descriptives$income)))
+```
+
+
+```{r ensure format right desc table, include = FALSE}
+str(df_race)
+str(df_education)
+str(df_sex)
+str(df_income)
+
+# Adding 'Variable' column to match df_race structure
+df_education$Variable <- "Education"
+df_sex$Variable <- "Sex"
+df_income$Variable <- "Income"
+
+# Moving the 'Variable' column to the first position to match df_race
+df_education <- df_education[, c("Variable", "Category", "Count")]
+df_sex <- df_sex[, c("Variable", "Category", "Count")]
+df_income <- df_income[, c("Variable", "Category", "Count")]
+
+combined_df <- rbind(df_race, df_education, df_sex, df_income)
+
+
+```
+
+
+```{r combined descrpitives categorical table display, results = 'asis', echo = FALSE}
+
+kable(combined_df, format = "latex", col.names = c("Variable", "Category", "Count"),
+      caption = "Summary of Categorical Variables")
+
+```
+
+
+```{r check income distribution, include=FALSE}
+class(filtered_ea_df$income)
+
+# Convert a haven_labelled variable to numeric
+filtered_ea_df$income <- as.numeric(filtered_ea_df$income)
+
+# Or, if you want to preserve the original variable and create a new one
+filtered_ea_df$income_numeric <- as.numeric(filtered_ea_df$income)
+
+hist(filtered_ea_df$income)
+
+```
+
+
+```{r  MLR MoA, not used in final report, include=FALSE}
+# Create the overall variable
+filtered_ea_df$Markers_of_Adulthood <- filtered_ea_df$MoAimportSUM + eamm_raw_df$MoAachieveSUM
+#Run model
+MLR1 <- lm(Markers_of_Adulthood ~ income + edu, data = filtered_ea_df)
+summary(MLR1)
+```
